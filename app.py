@@ -50,7 +50,7 @@ def clean_bing(href: str) -> str:
 
 async def text_of(el, selector):
     loc = el.locator(selector)
-    return (await loc.first.inner_text()).strip() if await loc.count() else ""
+    return ((await loc.first.text_content()) or "").strip() if await loc.count() else ""
 
 
 async def attr_of(el, selector, name):
