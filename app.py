@@ -59,7 +59,12 @@ async def run_search(query: str, max_results: int) -> dict:
                                 else r.continue_())
             page = await context.new_page()
             await page.goto(url, wait_until="domcontentloaded", timeout=25000)
-            await page.wait_for_selector(".result", timeout=15000)
+            try:
+                await page.wait_for_selector(".result", state="attached", timeout=15000)
+            except PlaywrightTimeoutError:
+                # Show what the page actually said (e.g. a bot check) to help debugging
+                body = (await page.inner_text("body"))[:300] if await page.locator("body").count() else ""
+                raise PlaywrightTimeoutError(f"No results. Page title: {await page.title()} | Page text: {body}")
 
             items = page.locator(".result:not(.result--ad)")
             count = await items.count()
